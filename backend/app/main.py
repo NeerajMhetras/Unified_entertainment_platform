@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from sqlalchemy import text
 from app.database.database import engine, Base
 from app.models.user import User
+from app.api.routers.user import router as user_router
+
 
 
 app = FastAPI(
@@ -9,14 +11,11 @@ app = FastAPI(
     version = "1.0.0",
 )
 
+app.include_router(user_router)
+
 Base.metadata.create_all(bind=engine)
 
 @app.get("/")
 async def root():
-    try:
-        with engine.connect() as connection:
-            connection.execute(text("SELECT 1"))
-        return {"message": "API is working!", "database_connection": "successful"}
-    except Exception as e:
-        return {"error":str(e)}
+   return {"message": "Backend running"}
 
