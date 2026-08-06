@@ -4,8 +4,7 @@ from fastapi import HTTPException
 
 from app.models.user import User
 from app.schemas.user import UserCreate,UserLogin
-from app.core.security import hash_password
-from app.core.security import verify_password
+from app.core.security import hash_password,verify_password,create_access_token
 
 
 def create_user(db: Session, user: UserCreate):
@@ -95,6 +94,13 @@ def login_user(db: Session, user: UserLogin):
             status_code=401,
             detail="Invalid email or password"
         )
-    return {
-        "message": "Login successful"
+    
+    access_token = create_access_token(
+        data={
+            "sub": str(db_user.id)
+        }
+    )
+    return{
+        "access_token": access_token,
+        "token_type": "bearer"
     }
