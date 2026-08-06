@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database.dependencies import get_db
-from app.schemas.user import UserCreate, UserResponse
-from app.services.user_service import create_user,get_all_users_service,get_user_by_id
+from app.schemas.user import UserCreate, UserResponse,UserLogin
+from app.services.user_service import create_user,get_all_users_service,get_user_by_id,login_user
 
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -32,3 +32,10 @@ async def get_user(
     db: Session = Depends(get_db)
 ):
     return get_user_by_id(db, user_id)
+
+@router.post("/login")
+async def login(
+    user: UserLogin,
+    db: Session = Depends(get_db)
+):
+    return login_user(db, user)
