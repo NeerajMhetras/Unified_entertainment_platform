@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 
 from app.models.user import User
 from app.schemas.user import UserCreate,UserLogin
@@ -74,11 +75,11 @@ def get_user_by_id(db: Session, user_id: int):
 
     return user
 
-def login_user(db: Session, user: UserLogin):
+def login_user(db: Session, form_data: OAuth2PasswordRequestForm):
 
     db_user = (
         db.query(User)
-        .filter(User.email == user.email)
+        .filter(User.email == form_data.username)
         .first()
     )
     if not db_user:
@@ -87,7 +88,7 @@ def login_user(db: Session, user: UserLogin):
             detail="Invalid email or password"
         )
     if not verify_password(
-        user.password,
+        form_data.password,
         db_user.password_hash
     ):
         raise HTTPException(
