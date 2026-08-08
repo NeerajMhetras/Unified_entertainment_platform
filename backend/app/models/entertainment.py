@@ -1,7 +1,7 @@
 from enum import Enum
 
 from sqlalchemy import Column, Integer, String, Text, Date, Enum as SQLEnum
-
+from sqlalchemy.orm import relationship
 from app.database.database import Base
 
 
@@ -35,3 +35,11 @@ class Entertainment(Base):
     external_id = Column(String(100), nullable=True)
 
     external_source = Column(String(50), nullable=True)
+
+    movie_details = relationship("MovieDetails",back_populates="entertainment",uselist=False, cascade="all, delete-orphan")
+
+    series_details = relationship("SeriesDetails",back_populates="entertainment",uselist=False, cascade="all, delete-orphan")
+
+    game_details = relationship("GameDetails",back_populates="entertainment",uselist=False, cascade="all, delete-orphan")
+
+    book_details = relationship("BookDetails",back_populates="entertainment",uselist=False, cascade = "all, delete-orphan")
