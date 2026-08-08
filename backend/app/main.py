@@ -3,6 +3,8 @@ from sqlalchemy import text
 from app.database.database import engine, Base
 from app.models.user import User
 from app.api.routers.user import router as user_router
+from app.models.entertainment import Entertainment
+
 
 
 
@@ -14,6 +16,8 @@ app = FastAPI(
 app.include_router(user_router)
 
 Base.metadata.create_all(bind=engine)
+
+
 
 @app.get("/")
 async def root():
