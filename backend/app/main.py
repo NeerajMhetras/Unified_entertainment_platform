@@ -8,7 +8,7 @@ from app.models.movie import MovieDetails
 from app.models.series import SeriesDetails
 from app.models.game import GameDetails,Platform
 from app.models.book import BookDetails, Author
-
+from app.models.entertainment_log import EntertainmentLog
 
 
 
