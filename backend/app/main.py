@@ -3,6 +3,7 @@ from sqlalchemy import text
 from app.database.database import engine, Base
 from app.models.user import User
 from app.api.routers.user import router as user_router
+from app.api.routers.entertainment_log import router as entertainment_log_router
 from app.models.entertainment import Entertainment
 from app.models.movie import MovieDetails
 from app.models.series import SeriesDetails
@@ -18,6 +19,7 @@ app = FastAPI(
 )
 
 app.include_router(user_router)
+app.include_router(entertainment_log_router)
 
 Base.metadata.create_all(bind=engine)
 
