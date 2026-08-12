@@ -1,7 +1,11 @@
+from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-class Settings(BaseSettings):
 
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+
+class Settings(BaseSettings):
     SECRET_KEY: str
     TMDB_API_KEY: str
     DATABASE_URL: str
@@ -10,7 +14,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     model_config = SettingsConfigDict(
-        env_file=".env"
+        env_file=BASE_DIR / ".env"
     )
 
 
