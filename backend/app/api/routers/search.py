@@ -32,3 +32,12 @@ async def search_entertainment(
         status_code=400,
         detail=f"Search for {media_type} is not supported yet"
     )
+
+@router.get("/movie/{movie_id}")
+async def movie_details(movie_id: str):
+
+    provider = TMDBProvider(
+        api_key=settings.TMDB_API_KEY
+    )
+
+    return await provider.get_movie_details(movie_id)
