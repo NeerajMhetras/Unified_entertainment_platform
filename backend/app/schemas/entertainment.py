@@ -3,11 +3,12 @@ from app.models.entertainment import MediaType
 from datetime import date
 
 
-class MovieImportRequest(BaseModel):
+class MediaImportRequest(BaseModel):
     external_id: str
+    media_type: MediaType 
 
 
-class EntertainmentResponse(BaseModel):
+class MediaResponse(BaseModel):
     id: int
     title: str
     description: str | None

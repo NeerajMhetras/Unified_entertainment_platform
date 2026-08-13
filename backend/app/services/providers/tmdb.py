@@ -38,6 +38,22 @@ class TMDBProvider:
             self._normalize_movie(movie)
             for movie in data["results"]
         ]
+
+    async def search_series(self, query: str):
+        url = "https://api.themoviedb.org/3/search/tv"
+
+        params = {"api_key": self.api_key, "query": query}
+
+        transport = httpx.AsyncHTTPTransport(local_address="0.0.0.0")
+
+        async with httpx.AsyncClient(transport=transport,timeout=30.0) as client:
+            response = await client.get(url,params=params)
+
+        response.raise_for_status()
+        data = response.json()
+
+        return self._normalize_series_search_results(data)
+
     
     async def get_movie_details(self, movie_id: str):
             url = f"https://api.themoviedb.org/3/movie/{movie_id}"
@@ -65,6 +81,7 @@ class TMDBProvider:
             data = response.json()
             return self._normalize_movie_details(data)
 
+    
 
     def _normalize_movie_details(self, movie: dict):
         return {
@@ -83,6 +100,26 @@ class TMDBProvider:
             "budget": movie.get("budget"),
             "revenue": movie.get("revenue")
         }
+
+    def _normalize_series_search_results(self, data: dict):
+        results = []
+        for series in data.get("results",[]):
+            results.append({
+                "external_id": str(series["id"]),
+                "title": series["name"],
+                "description": series.get("overview"),
+                "poster_url": (
+                    f"https://image.tmdb.org/t/p/w500"
+                    f"{series['poster_path']}"
+                    if series.get("poster_path")
+                    else None
+                ),
+                "release_date": series.get("first_air_date"),
+                "media_type": "series",
+                "language": series.get("original_language"),
+            })
+        return results
+
     
     def _normalize_movie(self, movie: dict) -> SearchResult:
 
@@ -104,4 +141,4 @@ class TMDBProvider:
             release_date=movie.get("release_date"),
             poster_url=poster_url
         )
-    
+
