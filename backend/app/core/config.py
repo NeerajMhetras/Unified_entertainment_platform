@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     TMDB_API_KEY: str
     DATABASE_URL: str
+    GOOGLE_BOOKS_API_KEY: str
 
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30

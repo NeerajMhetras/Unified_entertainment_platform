@@ -11,6 +11,9 @@ from app.schemas.search import SearchResult
 from app.schemas.entertainment import MediaResponse,MediaImportRequest
 
 from app.services.providers.tmdb import TMDBProvider
+from app.services.providers.google_books import GoogleBooksProvider
+
+
 from app.services.search_service import SearchService
 from app.services.media_service import MediaService
 
@@ -28,8 +31,9 @@ async def search_media(
     query: str = Query(..., min_length=1),
     media_type: MediaType = Query(...)
 ):
-    provider = TMDBProvider(api_key=settings.TMDB_API_KEY)
-    search_service = SearchService(tmdb_provider=provider)
+    tmdb = TMDBProvider(api_key=settings.TMDB_API_KEY)
+    google_books = GoogleBooksProvider(api_key=settings.GOOGLE_BOOKS_API_KEY)
+    search_service = SearchService(tmdb_provider=tmdb,google_books_provider=google_books)
 
     try:
         return await search_service.search(query=query,media_type=media_type)

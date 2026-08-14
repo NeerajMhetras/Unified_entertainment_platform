@@ -9,12 +9,6 @@ from sqlalchemy.orm import Session
 from app.database.dependencies import get_db
 from app.models.user import User
 
-# from app.core.config import (
-#     SECRET_KEY,
-#     ALGORITHM,
-#     ACCESS_TOKEN_EXPIRE_MINUTES
-# )
-
 from app.core.config import settings
 
 SECRET_KEY = settings.SECRET_KEY
