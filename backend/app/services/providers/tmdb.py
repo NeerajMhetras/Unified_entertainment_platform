@@ -54,6 +54,31 @@ class TMDBProvider:
 
         return self._normalize_series_search_results(data)
 
+    async def get_series_details(self, series_id: str):
+    
+            url = f"https://api.themoviedb.org/3/tv/{series_id}"
+    
+            params = {
+                "api_key": self.api_key
+            }
+    
+            transport = httpx.AsyncHTTPTransport(
+                local_address="0.0.0.0"
+            )
+    
+            async with httpx.AsyncClient(
+                transport=transport,
+                timeout=30.0
+            ) as client:
+    
+                response = await client.get(
+                    url,
+                    params=params
+                )
+    
+            response.raise_for_status()
+    
+            return response.json()
     
     async def get_movie_details(self, movie_id: str):
             url = f"https://api.themoviedb.org/3/movie/{movie_id}"
@@ -80,8 +105,6 @@ class TMDBProvider:
     
             data = response.json()
             return self._normalize_movie_details(data)
-
-    
 
     def _normalize_movie_details(self, movie: dict):
         return {
@@ -120,7 +143,6 @@ class TMDBProvider:
             })
         return results
 
-    
     def _normalize_movie(self, movie: dict) -> SearchResult:
 
         poster_path = movie.get("poster_path")
@@ -142,3 +164,4 @@ class TMDBProvider:
             poster_url=poster_url
         )
 
+    

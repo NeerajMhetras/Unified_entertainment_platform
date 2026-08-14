@@ -57,3 +57,14 @@ async def import_media_endpoint(
         return media
     except ValueError as e:
         raise HTTPException(status_code=400,detail=str(e))
+
+
+@router.get("/series/{series_id}")
+
+async def series_details(series_id: str):
+
+    provider = TMDBProvider(
+        api_key=settings.TMDB_API_KEY
+    )
+
+    return await provider.get_series_details(series_id)
