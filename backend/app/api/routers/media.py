@@ -12,6 +12,7 @@ from app.schemas.entertainment import MediaResponse,MediaImportRequest
 
 from app.services.providers.tmdb import TMDBProvider
 from app.services.providers.google_books import GoogleBooksProvider
+from app.services.providers.igdb import IGDBProvider
 
 
 from app.services.search_service import SearchService
@@ -33,6 +34,7 @@ async def search_media(
 ):
     tmdb = TMDBProvider(api_key=settings.TMDB_API_KEY)
     google_books = GoogleBooksProvider(api_key=settings.GOOGLE_BOOKS_API_KEY)
+    igdb = IGDBProvider(client_id=settings.IGDB_CLIENT_ID, client_secret=settings.IGDB_CLIENT_SECRET_KEY)
     search_service = SearchService(tmdb_provider=tmdb,google_books_provider=google_books)
 
     try:

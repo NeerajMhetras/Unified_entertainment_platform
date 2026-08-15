@@ -1,10 +1,12 @@
 from app.models.entertainment import MediaType
 from app.services.providers.tmdb import TMDBProvider
 from app.services.providers.google_books import GoogleBooksProvider
+from app.services.providers.igdb import IGDBProvider
 class SearchService:
     def __init__(self, tmdb_provider: TMDBProvider, google_books_provider: GoogleBooksProvider):
         self.tmdb_provider = tmdb_provider
         self.google_books_provider = google_books_provider
+        self.igdb_provider= IGDBProvider
 
     async def search(
         self,
@@ -19,6 +21,10 @@ class SearchService:
 
         if media_type == MediaType.BOOK:
             return await self.google_books_provider.search_book(query)
+
+        if media_type == MediaType.GAME:
+            return await self.igdb_provider.search_game(query)
+
         raise ValueError(
             f"Search provider not implemented for {media_type}"
         )
