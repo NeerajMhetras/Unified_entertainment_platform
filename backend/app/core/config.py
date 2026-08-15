@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     TMDB_API_KEY: str
     DATABASE_URL: str
     GOOGLE_BOOKS_API_KEY: str
+    IGDB_CLIENT_ID: str
+    IGDB_CLIENT_SECRET_KEY: str
 
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
