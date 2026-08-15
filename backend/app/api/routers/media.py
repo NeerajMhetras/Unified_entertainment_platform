@@ -33,9 +33,15 @@ async def search_media(
     media_type: MediaType = Query(...)
 ):
     tmdb = TMDBProvider(api_key=settings.TMDB_API_KEY)
+    
     google_books = GoogleBooksProvider(api_key=settings.GOOGLE_BOOKS_API_KEY)
-    igdb = IGDBProvider(client_id=settings.IGDB_CLIENT_ID, client_secret=settings.IGDB_CLIENT_SECRET_KEY)
-    search_service = SearchService(tmdb_provider=tmdb,google_books_provider=google_books)
+
+    igdb = IGDBProvider(client_id=settings.IGDB_CLIENT_ID, 
+                        client_secret=settings.IGDB_CLIENT_SECRET_KEY
+                       )
+    search_service = SearchService(tmdb_provider=tmdb, 
+                                   google_books_provider=google_books, 
+                                   igdb_provider= igdb)
 
     try:
         return await search_service.search(query=query,media_type=media_type)

@@ -3,10 +3,10 @@ from app.services.providers.tmdb import TMDBProvider
 from app.services.providers.google_books import GoogleBooksProvider
 from app.services.providers.igdb import IGDBProvider
 class SearchService:
-    def __init__(self, tmdb_provider: TMDBProvider, google_books_provider: GoogleBooksProvider):
+    def __init__(self, tmdb_provider: TMDBProvider, google_books_provider: GoogleBooksProvider, igdb_provider: IGDBProvider):
         self.tmdb_provider = tmdb_provider
         self.google_books_provider = google_books_provider
-        self.igdb_provider= IGDBProvider
+        self.igdb_provider = igdb_provider
 
     async def search(
         self,
