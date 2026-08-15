@@ -1,6 +1,6 @@
 from enum import Enum
 
-from sqlalchemy import Column, Integer, String, Text, Date, Enum as SQLEnum
+from sqlalchemy import Column, Integer, String, Text, Date, Enum as SQLEnum, UniqueConstraint
 from sqlalchemy.orm import relationship
 from app.database.database import Base
 
@@ -14,6 +14,8 @@ class MediaType(str, Enum):
 
 class Entertainment(Base):
     __tablename__ = "entertainment"
+
+    __table_args__ = (UniqueConstraint("external_source","external_id",name="uq_entertainment_external_source_id"),)
 
     id = Column(Integer, primary_key=True, index=True)
 

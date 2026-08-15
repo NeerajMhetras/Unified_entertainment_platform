@@ -5,7 +5,7 @@ from app.database.database import engine, Base
 
 from app.api.routers.user import router as user_router
 from app.api.routers.entertainment_log import router as entertainment_log_router
-
+from app.api.routers.media import router as entertainment_router
 
 
 from app.models.user import User
@@ -26,6 +26,7 @@ app = FastAPI(
 
 app.include_router(user_router)
 app.include_router(entertainment_log_router)
+app.include_router(entertainment_router)
 
 Base.metadata.create_all(bind=engine)
 
