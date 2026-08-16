@@ -59,7 +59,14 @@ async def import_media_endpoint(
     tmdb = TMDBProvider(
         api_key=settings.TMDB_API_KEY
     )
-    media_service = MediaService(tmdb_provider= tmdb)
+    google_books = GoogleBooksProvider(
+        api_key=settings.GOOGLE_BOOKS_API_KEY
+    )
+    igdb_provider = IGDBProvider(
+        client_id=settings.IGDB_CLIENT_ID,
+        client_secret=settings.IGDB_CLIENT_SECRET_KEY
+    )
+    media_service = MediaService(tmdb_provider= tmdb, google_books_provider = google_books, igdb_provider=igdb_provider)
     try:
         media = await media_service.import_media(
             db=db,
@@ -87,3 +94,12 @@ async def series_details(series_id: str):
 async def book_details(book_id: str):
     google_books = GoogleBooksProvider(settings.GOOGLE_BOOKS_API_KEY)
     return await google_books.get_book_details(book_id=book_id)
+
+
+@router.get("/games/{game_id}")
+
+async def game_details(game_id: str):
+    igdb_provider = IGDBProvider(client_id=settings.IGDB_CLIENT_ID,
+                                 client_secret=settings.IGDB_CLIENT_SECRET_KEY
+    )
+    return await igdb_provider.get_game_details(game_id)

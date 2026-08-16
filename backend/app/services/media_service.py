@@ -3,15 +3,22 @@ from sqlalchemy.orm import Session
 from app.models.entertainment import Entertainment, MediaType
 from app.models.movie import MovieDetails
 from app.models.series import SeriesDetails
+from app.models.book import BookDetails,Author
+from app.models.game import Platform,GameDetails
+
+
 from app.services.providers.tmdb import TMDBProvider
 from app.services.providers.google_books import GoogleBooksProvider
+from app.services.providers.igdb import IGDBProvider
+
 
 
 class MediaService:
 
-    def __init__(self, tmdb_provider: TMDBProvider, google_books: GoogleBooksProvider):
+    def __init__(self, tmdb_provider: TMDBProvider, google_books_provider: GoogleBooksProvider, igdb_provider: IGDBProvider):
         self.tmdb_provider = tmdb_provider
-        self.google_books = google_books
+        self.google_books_provider = google_books_provider
+        self.igdb_provider = igdb_provider
 
     async def import_media(
         self,
@@ -20,20 +27,27 @@ class MediaService:
         media_type: MediaType
     ):
 
-        # Currently TMDB handles movies and series
         if media_type not in (
             MediaType.MOVIE,
-            MediaType.SERIES
+            MediaType.SERIES,
+            MediaType.BOOK,
+            MediaType.GAME
         ):
             raise ValueError(
                 f"Import for {media_type} is not supported yet"
             )
+        external_source = None
+        if media_type in [MediaType.MOVIE,MediaType.SERIES]:
+            external_source = "TMDB"
+        elif media_type == MediaType.BOOK:
+            external_source = "GoogleBooks"
+        else:
+            external_source = "IGDB"
 
-        # Check whether this media already exists
         existing = (
             db.query(Entertainment)
             .filter(
-                Entertainment.external_source == "TMDB",
+                Entertainment.external_source == external_source,
                 Entertainment.external_id == external_id,
                 Entertainment.media_type == media_type
             )
@@ -110,6 +124,89 @@ class MediaService:
 
             db.add(series_details)
 
+        # -------------------------
+                # BOOKS
+        # -------------------------
+
+        elif media_type == MediaType.BOOK:
+            media_data = await self.google_books_provider.get_book_details(external_id)
+
+            entertainment = Entertainment(
+                title = media_data["title"],
+                description=media_data.get("description"),
+                poster_url=media_data.get("poster_url"),
+                release_date=media_data.get("release_date"),
+                media_type=MediaType.BOOK,
+                language=media_data.get("language"),
+                external_id=media_data["external_id"],
+                external_source=media_data["external_source"],
+            )
+            db.add(entertainment)
+            db.flush()
+
+            book = BookDetails(
+                entertainment_id=entertainment.id,
+                isbn=media_data.get("isbn"),
+                pages=media_data.get("pages"),
+                publisher=media_data.get("publisher")
+            )
+
+            db.add(book)
+            db.flush()
+
+            for author_name in media_data.get("authors", []):
+                author = (
+                    db.query(Author)
+                    .filter(Author.name == author_name)
+                    .first()
+                )
+
+                if not author:
+                    author = Author(
+                        name=author_name
+                    )
+
+                    db.add(author)
+                    db.flush()
+                book.authors.append(author)
+
+        # -------------------------
+                # GAMES
+        # -------------------------
+
+        elif media_type == MediaType.GAME:
+            media_data = await self.igdb_provider.get_game_details(external_id)
+            entertainment = Entertainment(
+                title = media_data["title"],
+                description=media_data.get("description"),
+                poster_url=media_data.get("poster_url"),
+                release_date=media_data.get("release_date"),
+                media_type=MediaType.GAME,
+                language=media_data.get("language"),
+                external_id=media_data["external_id"],
+                external_source=media_data["external_source"],
+            )
+            db.add(entertainment)
+            db.flush()
+
+            game = GameDetails(
+                entertainment_id = entertainment.id
+            )
+            db.add(game)
+            db.flush()
+
+            for platform_name in media_data.get("platforms",[]):
+                platform = (db.query(Platform).filter(
+                    Platform.name == platform_name
+                ).first()
+                )
+                if not platform:
+                    platform = Platform(
+                        name = platform_name
+                    )
+                    db.add(platform)
+                    db.flush()
+                game.platforms.append(platform)
         db.commit()
         db.refresh(entertainment)
 

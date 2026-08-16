@@ -96,3 +96,70 @@ class IGDBProvider:
             release_date=release_date,
             poster_url=poster_url,
         )
+
+    async def get_game_details(self, game_id: str):
+        headers = await self._get_headers()
+        body = f'''
+        fields
+            name,summary,cover.url,first_release_date,platforms.name;
+            where id = {game_id};
+        '''
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                url=f"{self.BASE_URL}/games",
+                headers=headers,
+                content=body
+            )
+
+        response.raise_for_status()
+
+        games = response.json()
+
+        return self._normalize_game_details(games[0])
+
+    def _normalize_game_details(self, game: dict):
+
+        release_date = None
+
+        if game.get("first_release_date"):
+            release_date = datetime.fromtimestamp(
+                game["first_release_date"]
+            ).date()
+
+        platforms = [
+            platform["name"]
+            for platform in game.get("platforms", [])
+            if platform.get("name")
+        ]
+
+        cover_url = None
+
+        if game.get("cover") and game["cover"].get("url"):
+            cover_url = game["cover"]["url"]
+
+            if cover_url.startswith("//"):
+                cover_url = "https:" + cover_url
+
+            cover_url = cover_url.replace(
+                "t_thumb",
+                "t_cover_big"
+            )
+
+        return {
+            "external_id": str(game["id"]),
+            "external_source": "IGDB",
+
+            "title": game.get("name"),
+            "description": game.get("summary"),
+
+            "poster_url": cover_url,
+
+            "release_date": release_date,
+
+            "language": None,
+
+            "platforms": platforms,
+
+            "media_type": MediaType.GAME
+        }
+        
