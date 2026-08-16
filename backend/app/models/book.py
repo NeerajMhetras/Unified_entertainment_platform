@@ -60,7 +60,8 @@ class Author(Base):
 
     name = Column(
         String(255),
-        nullable=False
+        nullable=False,
+        unique=True
     )
 
     books = relationship(

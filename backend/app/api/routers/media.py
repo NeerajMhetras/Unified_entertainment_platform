@@ -33,7 +33,7 @@ async def search_media(
     media_type: MediaType = Query(...)
 ):
     tmdb = TMDBProvider(api_key=settings.TMDB_API_KEY)
-    
+
     google_books = GoogleBooksProvider(api_key=settings.GOOGLE_BOOKS_API_KEY)
 
     igdb = IGDBProvider(client_id=settings.IGDB_CLIENT_ID, 
@@ -80,3 +80,10 @@ async def series_details(series_id: str):
     )
 
     return await provider.get_series_details(series_id)
+
+
+@router.get("/books/{books_id}")
+
+async def book_details(book_id: str):
+    google_books = GoogleBooksProvider(settings.GOOGLE_BOOKS_API_KEY)
+    return await google_books.get_book_details(book_id=book_id)

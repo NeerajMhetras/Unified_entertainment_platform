@@ -1,5 +1,5 @@
 import httpx
-
+from app.schemas.entertainment import MediaType
 class GoogleBooksProvider:
 
     BASE_URL = "https://www.googleapis.com/books/v1"
@@ -54,3 +54,67 @@ class GoogleBooksProvider:
             })
 
         return results
+
+    async def get_book_details(self, book_id: str):
+
+        url = f"{self.BASE_URL}/volumes/{book_id}"
+
+        params = {
+            "key": self.api_key
+        }
+
+        async with httpx.AsyncClient(
+            timeout=30.0
+        ) as client:
+
+            response = await client.get(
+                url,
+                params=params
+            )
+
+        response.raise_for_status()
+
+        data = response.json()
+
+        return self._normalize_book_details(data)
+    
+    def _normalize_book_details(self, data: dict):
+
+        volume = data.get("volumeInfo", {})
+
+        isbn = None
+
+        for identifier in volume.get("industryIdentifiers", []):
+            if identifier.get("type") == "ISBN_13":
+                isbn = identifier.get("identifier")
+                break
+
+        if isbn is None:
+            for identifier in volume.get("industryIdentifiers", []):
+                if identifier.get("type") == "ISBN_10":
+                    isbn = identifier.get("identifier")
+                    break
+
+        return {
+            "external_id": data["id"],
+            "external_source": "GOOGLE_BOOKS",
+
+            "title": volume.get("title"),
+            "description": volume.get("description"),
+
+            "poster_url": (
+                volume.get("imageLinks", {})
+                .get("thumbnail")
+            ),
+
+            "release_date": volume.get("publishedDate"),
+            "language": volume.get("language"),
+
+            "isbn": isbn,
+            "pages": volume.get("pageCount"),
+            "publisher": volume.get("publisher"),
+
+            "authors": volume.get("authors", []),
+
+            "media_type": MediaType.BOOK
+        }

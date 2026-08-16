@@ -4,12 +4,14 @@ from app.models.entertainment import Entertainment, MediaType
 from app.models.movie import MovieDetails
 from app.models.series import SeriesDetails
 from app.services.providers.tmdb import TMDBProvider
+from app.services.providers.google_books import GoogleBooksProvider
 
 
 class MediaService:
 
-    def __init__(self, tmdb_provider: TMDBProvider):
+    def __init__(self, tmdb_provider: TMDBProvider, google_books: GoogleBooksProvider):
         self.tmdb_provider = tmdb_provider
+        self.google_books = google_books
 
     async def import_media(
         self,
