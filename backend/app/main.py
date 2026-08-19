@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from sqlalchemy import text
 from app.database.database import engine, Base
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routers.auth import router as auth_router
 from app.api.routers.user import router as user_router
@@ -19,10 +20,22 @@ from app.models.entertainment_log import EntertainmentLog
 
 
 
+
 app = FastAPI(
     title = "Unified Entertainment Platform API",
     version = "1.0.0",
 )
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 app.include_router(user_router)
 app.include_router(entertainment_log_router)
