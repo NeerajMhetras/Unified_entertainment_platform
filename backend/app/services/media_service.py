@@ -211,3 +211,100 @@ class MediaService:
         db.refresh(entertainment)
 
         return entertainment
+
+    def _get_media_details(self, media):
+
+        if media.media_type == MediaType.MOVIE:
+
+            details = media.movie_details
+
+            return {
+                "runtime": details.runtime,
+                "budget": details.budget,
+                "revenue": details.revenue
+            }
+
+        if media.media_type == MediaType.SERIES:
+
+            details = media.series_details
+
+            return {
+                "series_type": details.series_type,
+                "animation_type": details.animation_type,
+                "number_of_seasons": details.number_of_seasons,
+                "number_of_episodes": details.number_of_episodes
+            }
+
+        if media.media_type == MediaType.BOOK:
+
+            details = media.book_details
+
+            return {
+                "isbn": details.isbn,
+                "pages": details.pages,
+                "publisher": details.publisher,
+                "authors": [
+                    author.name
+                    for author in details.authors
+                ]
+            }
+
+        if media.media_type == MediaType.GAME:
+
+            details = media.game_details
+
+            return {
+                "platforms": [
+                    platform.name
+                    for platform in details.platforms
+                ]
+            }
+
+        return None
+
+    def _build_media_response(self, media):
+        details = self._get_media_details(media)
+        
+        media_response = {
+                    "id": media.id,
+                    "title": media.title,
+                    "description": media.description,
+                    "poster_url": media.poster_url,
+                    "release_date": media.release_date,
+                    "media_type": media.media_type,
+                    "language": media.language,
+                    "external_id": media.external_id,
+                    "external_source": media.external_source,
+                    "details": details
+                }
+        return media_response
+    
+    def get_media_by_id(
+            self,
+            db: Session,
+            media_id: int,
+    ):
+        media = (db.query(Entertainment).filter(Entertainment.id == media_id).first())
+
+        if not media:
+            return None
+        
+
+        return self._build_media_response(media)
+
+    def get_all_media(
+        self,
+        db: Session,
+        media_type: MediaType | None = None,
+        skip: int = 0,
+        limit: int = 20
+    ):
+        query = db.query(Entertainment)
+
+        if media_type:
+            query = query.filter(
+                Entertainment.media_type == media_type
+            )
+        media_list = (query.offset(skip).limit(limit).all())
+
+        return [self._build_media_response(media) for media in media_list]

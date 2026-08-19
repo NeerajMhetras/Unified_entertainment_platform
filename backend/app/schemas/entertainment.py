@@ -1,7 +1,7 @@
 from pydantic import BaseModel,ConfigDict
 from app.models.entertainment import MediaType
 from datetime import date
-
+from typing import Any
 
 class MediaImportRequest(BaseModel):
     external_id: str
@@ -18,6 +18,8 @@ class MediaResponse(BaseModel):
     language: str | None
     external_id: str | None
     external_source: str | None
+
+    details: Any = None
 
     model_config = ConfigDict(
         from_attributes=True

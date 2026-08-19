@@ -1,5 +1,6 @@
 import httpx
 from app.schemas.entertainment import MediaType
+from datetime import date
 class GoogleBooksProvider:
 
     BASE_URL = "https://www.googleapis.com/books/v1"
@@ -75,8 +76,30 @@ class GoogleBooksProvider:
         response.raise_for_status()
 
         data = response.json()
-
         return self._normalize_book_details(data)
+
+    def _parse_release_date(self, value: str | None):
+
+        if not value:
+            return None
+
+        try:
+            # YYYY-MM-DD
+            if len(value) == 10:
+                return date.fromisoformat(value)
+
+            # YYYY-MM
+            if len(value) == 7:
+                return date.fromisoformat(value + "-01")
+
+            # YYYY
+            if len(value) == 4:
+                return date.fromisoformat(value + "-01-01")
+
+        except ValueError:
+            return None
+
+        return None
     
     def _normalize_book_details(self, data: dict):
 
@@ -107,7 +130,7 @@ class GoogleBooksProvider:
                 .get("thumbnail")
             ),
 
-            "release_date": volume.get("publishedDate"),
+            "release_date": self._parse_release_date(volume.get("publishedDate")),
             "language": volume.get("language"),
 
             "isbn": isbn,

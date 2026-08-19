@@ -23,6 +23,38 @@ router = APIRouter(
     tags=["Media"]
 )
 
+tmdb = TMDBProvider(settings.TMDB_API_KEY)
+google_books = GoogleBooksProvider(settings.GOOGLE_BOOKS_API_KEY)
+igdb = IGDBProvider(
+    client_id=settings.IGDB_CLIENT_ID,
+    client_secret=settings.SECRET_KEY
+)
+
+
+@router.get(
+    "/",
+    response_model=list[MediaResponse]
+)
+async def get_media_list(
+    media_type: MediaType | None = Query(None),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db)
+):
+    
+    media_service = MediaService(
+        tmdb_provider=tmdb,
+        google_books_provider=google_books,
+        igdb_provider=igdb
+    )
+
+    return media_service.get_all_media(
+        db=db,
+        media_type=media_type,
+        skip=skip,
+        limit=limit
+    )
+
 
 @router.get(
     "/search",
@@ -32,13 +64,6 @@ async def search_media(
     query: str = Query(..., min_length=1),
     media_type: MediaType = Query(...)
 ):
-    tmdb = TMDBProvider(api_key=settings.TMDB_API_KEY)
-
-    google_books = GoogleBooksProvider(api_key=settings.GOOGLE_BOOKS_API_KEY)
-
-    igdb = IGDBProvider(client_id=settings.IGDB_CLIENT_ID, 
-                        client_secret=settings.IGDB_CLIENT_SECRET_KEY
-                       )
     search_service = SearchService(tmdb_provider=tmdb, 
                                    google_books_provider=google_books, 
                                    igdb_provider= igdb)
@@ -56,17 +81,7 @@ async def import_media_endpoint(
     request: MediaImportRequest,
     db: Session = Depends(get_db)
 ):
-    tmdb = TMDBProvider(
-        api_key=settings.TMDB_API_KEY
-    )
-    google_books = GoogleBooksProvider(
-        api_key=settings.GOOGLE_BOOKS_API_KEY
-    )
-    igdb_provider = IGDBProvider(
-        client_id=settings.IGDB_CLIENT_ID,
-        client_secret=settings.IGDB_CLIENT_SECRET_KEY
-    )
-    media_service = MediaService(tmdb_provider= tmdb, google_books_provider = google_books, igdb_provider=igdb_provider)
+    media_service = MediaService(tmdb_provider= tmdb, google_books_provider = google_books, igdb_provider=igdb)
     try:
         media = await media_service.import_media(
             db=db,
@@ -78,28 +93,23 @@ async def import_media_endpoint(
         raise HTTPException(status_code=400,detail=str(e))
 
 
-@router.get("/series/{series_id}")
+@router.get("/{media_id}", response_model=MediaResponse)
 
-async def series_details(series_id: str):
-
-    provider = TMDBProvider(
-        api_key=settings.TMDB_API_KEY
+async def get_media(
+    media_id: int,
+    db: Session = Depends(get_db)
+):
+    media_service = MediaService(
+        tmdb_provider=tmdb,
+        google_books_provider=google_books,
+        igdb_provider=igdb
     )
+    media = media_service.get_media_by_id(media_id=media_id,db=db)
 
-    return await provider.get_series_details(series_id)
+    if not media:
+        raise HTTPException(
+            status_code = 404,
+            detail="Media not found"
+        )
 
-
-@router.get("/books/{books_id}")
-
-async def book_details(book_id: str):
-    google_books = GoogleBooksProvider(settings.GOOGLE_BOOKS_API_KEY)
-    return await google_books.get_book_details(book_id=book_id)
-
-
-@router.get("/games/{game_id}")
-
-async def game_details(game_id: str):
-    igdb_provider = IGDBProvider(client_id=settings.IGDB_CLIENT_ID,
-                                 client_secret=settings.IGDB_CLIENT_SECRET_KEY
-    )
-    return await igdb_provider.get_game_details(game_id)
+    return media
