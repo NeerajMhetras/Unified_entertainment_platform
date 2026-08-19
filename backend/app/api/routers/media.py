@@ -8,7 +8,7 @@ from app.database.dependencies import get_db
 from app.models.entertainment import MediaType
 
 from app.schemas.search import SearchResult
-from app.schemas.entertainment import MediaResponse,MediaImportRequest
+from app.schemas.entertainment import MediaResponse,MediaImportRequest, MediaListResponse
 
 from app.services.providers.tmdb import TMDBProvider
 from app.services.providers.google_books import GoogleBooksProvider
@@ -33,7 +33,7 @@ igdb = IGDBProvider(
 
 @router.get(
     "/",
-    response_model=list[MediaResponse]
+    response_model=MediaListResponse
 )
 async def get_media_list(
     media_type: MediaType | None = Query(None),

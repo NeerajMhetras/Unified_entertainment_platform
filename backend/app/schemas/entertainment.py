@@ -24,3 +24,9 @@ class MediaResponse(BaseModel):
     model_config = ConfigDict(
         from_attributes=True
     )
+
+class MediaListResponse(BaseModel):
+    items: list[MediaResponse]
+    total: int
+    skip: int
+    limit: int

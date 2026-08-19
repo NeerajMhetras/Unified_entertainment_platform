@@ -305,6 +305,17 @@ class MediaService:
             query = query.filter(
                 Entertainment.media_type == media_type
             )
+
+        total = query.count()
+        
         media_list = (query.offset(skip).limit(limit).all())
 
-        return [self._build_media_response(media) for media in media_list]
+
+        items = [self._build_media_response(media) for media in media_list]
+
+        return {
+            "items" : items,
+            "total" : total,
+            "skip" : skip,
+            "limit": limit
+        }
