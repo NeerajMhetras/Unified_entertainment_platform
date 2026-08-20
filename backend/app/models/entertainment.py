@@ -47,3 +47,5 @@ class Entertainment(Base):
     book_details = relationship("BookDetails",back_populates="entertainment",uselist=False, cascade = "all, delete-orphan")
 
     logs = relationship("EntertainmentLog",back_populates="entertainment",cascade="all, delete-orphan")
+
+    watchlist = relationship("Watchlist", back_populates="entertainment",cascade="all, delete-orphan")

@@ -95,7 +95,6 @@ class TMDBProvider:
     
             data = response.json()
 
-            # return data
             return self._normalize_series_details(data)
 
     @tmdb_retry
@@ -123,8 +122,7 @@ class TMDBProvider:
             response.raise_for_status()
     
             data = response.json()
-            return data
-            # return self._normalize_movie_details(data)
+            return self._normalize_movie_details(data)
 
     def _normalize_movie_search_results(self, movie: dict) -> SearchResult:
 

@@ -10,3 +10,4 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
     entertainment_logs = relationship("EntertainmentLog",back_populates="user",cascade="all, delete-orphan")
+    watchlist = relationship("Watchlist", back_populates="user", cascade="all, delete-orphan")
